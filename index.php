@@ -492,54 +492,56 @@
     <?php require_once __DIR__ . "/scripts.php"; ?>
 
     <script>
-        const instanceInput = document.getElementById('instanceName');
-        const loadButton = document.getElementById('loadButton');
-        const solveButton = document.getElementById('solveButton');
-        const statusText = document.getElementById('statusText');
-        const problemState = document.getElementById('problemState');
-        const loadedEmpty = document.getElementById('loadedEmpty');
-        const loadedCard = document.getElementById('loadedCard');
-        const loadedName = document.getElementById('loadedName');
-        const loadedPreview = document.getElementById('loadedPreview');
-        const pathOutput = document.getElementById('pathOutput');
+        $(function () {
+            const $instanceInput = $('#instanceName');
+            const $loadButton = $('#loadButton');
+            const $solveButton = $('#solveButton');
+            const $statusText = $('#statusText');
+            const $problemState = $('#problemState');
+            const $loadedEmpty = $('#loadedEmpty');
+            const $loadedCard = $('#loadedCard');
+            const $loadedName = $('#loadedName');
+            const $loadedPreview = $('#loadedPreview');
+            const $pathOutput = $('#pathOutput');
 
-        let activeInstance = '';
+            let activeInstance = '';
 
-        loadButton.addEventListener('click', () => {
-            const instanceName = instanceInput.value.trim();
+            $loadButton.on('click', function () {
+                const instanceName = $instanceInput.val().trim();
 
-            if (!instanceName) {
-                instanceInput.focus();
-                statusText.textContent = 'Enter an instance name';
-                return;
-            }
+                if (!instanceName) {
+                    $instanceInput.trigger('focus');
+                    $statusText.text('Enter an instance name');
+                    return;
+                }
 
-            activeInstance = instanceName;
-            problemState.textContent = "Loaded";
-            statusText.textContent = 'Instance loaded';
-            loadedName.textContent = instanceName;
-            loadedPreview.textContent = `${instanceName} is selected. Real TSP coordinates and metadata can be rendered in this panel once the API is connected.`;
-            loadedEmpty.style.display = 'none';
-            loadedCard.classList.add('active');
-            pathOutput.textContent = 'No output path yet.';
-        });
+                activeInstance = instanceName;
+                $problemState.text('Loaded');
+                $statusText.text('Instance loaded');
+                $loadedName.text(instanceName);
+                $loadedPreview.text(`${instanceName} is selected. Real TSP coordinates and metadata can be rendered in this panel once the API is connected.`);
+                $loadedEmpty.hide();
+                $loadedCard.addClass('active');
+                $pathOutput.text('No output path yet.');
+            });
 
-        solveButton.addEventListener('click', () => {
-            if (!activeInstance) {
-                statusText.textContent = 'Load an instance first';
-                instanceInput.focus();
-                return;
-            }
+            $solveButton.on('click', function () {
+                if (!activeInstance) {
+                    $statusText.text('Load an instance first');
+                    $instanceInput.trigger('focus');
+                    return;
+                }
 
-            problemState.textContent = "Solved";
-            statusText.textContent = 'Solution ready';
-            pathOutput.textContent = [
-                `Instance: ${activeInstance}`,
-                'Path: 1 -> 2 -> 3 -> ... -> 1',
-                'Total distance: --',
-                '',
-                'This is a UI placeholder. Replace it with the API result when the backend is connected.'
-            ].join('\n');
+                $problemState.text('Solved');
+                $statusText.text('Solution ready');
+                $pathOutput.text([
+                    `Instance: ${activeInstance}`,
+                    'Path: 1 -> 2 -> 3 -> ... -> 1',
+                    'Total distance: --',
+                    '',
+                    'This is a UI placeholder. Replace it with the API result when the backend is connected.'
+                ].join('\n'));
+            });
         });
     </script>
 </body>
