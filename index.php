@@ -397,7 +397,7 @@
                     <div class="brand-mark" aria-hidden="true">TSP</div>
                     <div>
                         <h1>Travelling Salesman Solver</h1>
-                        <p class="subtitle">Load an instance, inspect it, then run the solver.</p>
+                        <p class="subtitle">Load/define a problem, inspect it, run the solver.</p>
                     </div>
                 </div>
                 <div class="status-pill" aria-live="polite">
@@ -432,16 +432,8 @@
 
                     <div class="details-list" aria-label="Instance details">
                         <div class="detail">
-                            <span>Selected instance</span>
-                            <strong id="selectedInstance">None</strong>
-                        </div>
-                        <div class="detail">
-                            <span>Loaded state</span>
-                            <strong id="loadedState">Not loaded</strong>
-                        </div>
-                        <div class="detail">
-                            <span>Solver state</span>
-                            <strong id="solverState">Idle</strong>
+                            <span>Problem state</span>
+                            <strong id="problemState">None</strong>
                         </div>
                     </div>
                 </aside>
@@ -504,9 +496,7 @@
         const loadButton = document.getElementById('loadButton');
         const solveButton = document.getElementById('solveButton');
         const statusText = document.getElementById('statusText');
-        const selectedInstance = document.getElementById('selectedInstance');
-        const loadedState = document.getElementById('loadedState');
-        const solverState = document.getElementById('solverState');
+        const problemState = document.getElementById('problemState');
         const loadedEmpty = document.getElementById('loadedEmpty');
         const loadedCard = document.getElementById('loadedCard');
         const loadedName = document.getElementById('loadedName');
@@ -525,9 +515,7 @@
             }
 
             activeInstance = instanceName;
-            selectedInstance.textContent = instanceName;
-            loadedState.textContent = 'Loaded';
-            solverState.textContent = 'Idle';
+            problemState.textContent = "Loaded";
             statusText.textContent = 'Instance loaded';
             loadedName.textContent = instanceName;
             loadedPreview.textContent = `${instanceName} is selected. Real TSP coordinates and metadata can be rendered in this panel once the API is connected.`;
@@ -543,7 +531,7 @@
                 return;
             }
 
-            solverState.textContent = 'Solved';
+            problemState.textContent = "Solved";
             statusText.textContent = 'Solution ready';
             pathOutput.textContent = [
                 `Instance: ${activeInstance}`,
