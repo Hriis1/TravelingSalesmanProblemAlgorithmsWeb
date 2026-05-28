@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -389,6 +390,7 @@
         }
     </style>
 </head>
+
 <body>
     <main class="page">
         <section class="app-shell" aria-label="TSP solver interface">
@@ -411,13 +413,8 @@
                     <form id="tspForm">
                         <div class="field">
                             <label for="instanceName">TSP instance name</label>
-                            <input
-                                type="text"
-                                id="instanceName"
-                                name="instanceName"
-                                placeholder="example: berlin52"
-                                autocomplete="off"
-                            >
+                            <input type="text" id="instanceName" name="instanceName" placeholder="example: berlin52"
+                                autocomplete="off">
                         </div>
 
                         <div class="button-stack">
@@ -427,7 +424,8 @@
                     </form>
 
                     <p class="hint">
-                        This screen is UI-only. The buttons update the placeholders locally so the layout is ready for real API calls later.
+                        This screen is UI-only. The buttons update the placeholders locally so the layout is ready for
+                        real API calls later.
                     </p>
 
                     <div class="details-list" aria-label="Instance details">
@@ -491,6 +489,8 @@
         </section>
     </main>
 
+    <?php require_once __DIR__ . "/scripts.php"; ?>
+
     <script>
         const instanceInput = document.getElementById('instanceName');
         const loadButton = document.getElementById('loadButton');
@@ -543,4 +543,5 @@
         });
     </script>
 </body>
+
 </html>
