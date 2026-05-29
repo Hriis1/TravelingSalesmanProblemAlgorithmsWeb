@@ -127,7 +127,7 @@
                         <article class="panel">
                             <div class="panel-header">
                                 <h3>Solution data</h3>
-                                <span class="panel-tag">Data aout the solution</span>
+                                <span class="panel-tag">Data about the solution</span>
                             </div>
                             <div class="panel-body">
                                 <pre class="path-output" id="pathOutput">No output path yet.</pre>
