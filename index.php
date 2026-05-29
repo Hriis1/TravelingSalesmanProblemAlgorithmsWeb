@@ -198,6 +198,7 @@
                         </div>
 
                         <div class="button-stack">
+                            <button class="btn btn-secondary" type="button" id="loadButton">Load TSP</button>
                             <button class="btn btn-primary" type="button" id="solveButton">Solve TSP</button>
                         </div>
                     </form>
