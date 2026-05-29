@@ -80,8 +80,12 @@
 
                             <div class="field">
                                 <label>Problem definition</label>
-                                <div class="point-board" id="customPointBoard" role="img"
-                                    aria-label="Custom TSP point placement area">
+                                <div class="point-board-frame">
+                                    <div class="board-coord board-coord-max" id="inputBoardCoordsMax">0</div>
+                                    <div class="point-board" id="customPointBoard" role="img"
+                                        aria-label="Custom TSP point placement area">
+                                    </div>
+                                    <div class="board-coord board-coord-min" id="inputBoardCoordsMin">0</div>
                                 </div>
                             </div>
                         </div>
@@ -118,8 +122,22 @@
                                 <span class="panel-tag">The path the solver found</span>
                             </div>
                             <div class="panel-body">
-                                <div class="point-board point-board-readonly" id="outputPathBoard" role="img"
-                                    aria-label="Output TSP path preview area">
+                                <div class="coords-summary" aria-label="Output coordinate range">
+                                    <div class="coord-summary-item">
+                                        <span>Coords min</span>
+                                        <strong id="outputCoordsMin">0</strong>
+                                    </div>
+                                    <div class="coord-summary-item">
+                                        <span>Coords max</span>
+                                        <strong id="outputCoordsMax">0</strong>
+                                    </div>
+                                </div>
+                                <div class="point-board-frame">
+                                    <div class="board-coord board-coord-max" id="outputBoardCoordsMax">0</div>
+                                    <div class="point-board point-board-readonly" id="outputPathBoard" role="img"
+                                        aria-label="Output TSP path preview area">
+                                    </div>
+                                    <div class="board-coord board-coord-min" id="outputBoardCoordsMin">0</div>
                                 </div>
                             </div>
                         </article>

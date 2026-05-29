@@ -6,6 +6,12 @@ $(function () {
     const $problemState = $('#problemState');
     const $statusText = $('#statusText');
     const $pathOutput = $('#pathOutput');
+    const $outputCoordsMin = $('#outputCoordsMin');
+    const $outputCoordsMax = $('#outputCoordsMax');
+    const $inputBoardCoordsMin = $('#inputBoardCoordsMin');
+    const $inputBoardCoordsMax = $('#inputBoardCoordsMax');
+    const $outputBoardCoordsMin = $('#outputBoardCoordsMin');
+    const $outputBoardCoordsMax = $('#outputBoardCoordsMax');
     const $solveButton = $('#solveButton');
 
     const $instanceName = $('#instanceName');
@@ -21,6 +27,18 @@ $(function () {
     function setProblemState(state, status) {
         $problemState.text(state);
         $statusText.text(status);
+    }
+
+    function resetOutputCoords() {
+        $outputCoordsMin.text('0');
+        $outputCoordsMax.text('0');
+        $outputBoardCoordsMin.text('0');
+        $outputBoardCoordsMax.text('0');
+    }
+
+    function updateInputBoardCoords() {
+        $inputBoardCoordsMin.text($coordsMin.val().trim() || '0');
+        $inputBoardCoordsMax.text($coordsMax.val().trim() || '0');
     }
 
     function focusFirstEmpty($fields) {
@@ -42,12 +60,15 @@ $(function () {
 
         $selectedInputType.text(getInputTypeLabel(inputType));
         setProblemState('None', `${getInputTypeLabel(inputType)} selected`);
+        resetOutputCoords();
         $pathOutput.text('No output path yet.');
     }
 
     $inputTypes.on('change', function () {
         switchInputType($(this).val());
     });
+
+    $coordsMin.add($coordsMax).on('input', updateInputBoardCoords);
 
     $solveButton.on('click', function () {
         const inputType = $inputTypes.filter(':checked').val();
@@ -59,6 +80,7 @@ $(function () {
             }
 
             setProblemState('Solved', 'Solution ready');
+            resetOutputCoords();
             $pathOutput.text([
                 `Input type: TSP Instance`,
                 `Instance: ${$instanceName.val().trim()}`,
@@ -85,6 +107,10 @@ $(function () {
         }
 
         setProblemState('Solved', 'Solution ready');
+        $outputCoordsMin.text(coordsMin);
+        $outputCoordsMax.text(coordsMax);
+        $outputBoardCoordsMin.text(coordsMin);
+        $outputBoardCoordsMax.text(coordsMax);
         $pathOutput.text([
             `Input type: Custom TSP`,
             `Algorithm: ${$customAlgorithm.val().trim()}`,
