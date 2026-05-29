@@ -43,7 +43,7 @@ $(function () {
         $solutionNCities.text('--');
         $solutionDist.text('--');
         $solutionNnDist.text('--');
-        $solutionOptimalDist.text('-1');
+        $solutionOptimalDist.text('--');
     }
 
     // Write the current placeholder solution values
@@ -127,6 +127,6 @@ $(function () {
         setProblemState('Solved', 'Solution ready');
         $outputBoardCoordsMin.text(coordsMin);
         $outputBoardCoordsMax.text(coordsMax);
-        setSolutionData('0', '--', '--', '-1');
+        setSolutionData('0', '--', '--', '--');
     });
 });
