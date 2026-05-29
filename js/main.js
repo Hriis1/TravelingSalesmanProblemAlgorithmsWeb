@@ -6,8 +6,6 @@ $(function () {
     const $problemState = $('#problemState');
     const $statusText = $('#statusText');
     const $pathOutput = $('#pathOutput');
-    const $outputCoordsMin = $('#outputCoordsMin');
-    const $outputCoordsMax = $('#outputCoordsMax');
     const $inputBoardCoordsMin = $('#inputBoardCoordsMin');
     const $inputBoardCoordsMax = $('#inputBoardCoordsMax');
     const $outputBoardCoordsMin = $('#outputBoardCoordsMin');
@@ -20,27 +18,30 @@ $(function () {
     const $coordsMin = $('#coordsMin');
     const $coordsMax = $('#coordsMax');
 
+    // Display names for the two supported input modes
     function getInputTypeLabel(inputType) {
         return inputType === 'custom' ? 'Custom TSP' : 'TSP Instance';
     }
 
+    // Keep the status pill and problem state in sync
     function setProblemState(state, status) {
         $problemState.text(state);
         $statusText.text(status);
     }
 
+    // Reset output board coordinate labels to their default values
     function resetOutputCoords() {
-        $outputCoordsMin.text('0');
-        $outputCoordsMax.text('0');
         $outputBoardCoordsMin.text('0');
         $outputBoardCoordsMax.text('0');
     }
 
+    // Mirror custom coord inputs onto the input board labels
     function updateInputBoardCoords() {
         $inputBoardCoordsMin.text($coordsMin.val().trim() || '0');
         $inputBoardCoordsMax.text($coordsMax.val().trim() || '0');
     }
 
+    // Focus the first required field that has no value.
     function focusFirstEmpty($fields) {
         const emptyField = $fields.toArray().find((field) => !$(field).val().trim());
 
@@ -51,6 +52,7 @@ $(function () {
         return Boolean(emptyField);
     }
 
+    // Show only the form fields for the selected input type
     function switchInputType(inputType) {
         $typeOptions.removeClass('active');
         $inputTypes.filter(`[value="${inputType}"]`).closest('.type-option').addClass('active');
@@ -64,12 +66,15 @@ $(function () {
         $pathOutput.text('No output path yet.');
     }
 
+    // Toggle between TSP Instance and Custom TSP input
     $inputTypes.on('change', function () {
         switchInputType($(this).val());
     });
 
+    // Update board labels while the user edits the coordinate range
     $coordsMin.add($coordsMax).on('input', updateInputBoardCoords);
 
+    // Validate the visible form and write placeholder solution output
     $solveButton.on('click', function () {
         const inputType = $inputTypes.filter(':checked').val();
 
@@ -107,8 +112,6 @@ $(function () {
         }
 
         setProblemState('Solved', 'Solution ready');
-        $outputCoordsMin.text(coordsMin);
-        $outputCoordsMax.text(coordsMax);
         $outputBoardCoordsMin.text(coordsMin);
         $outputBoardCoordsMax.text(coordsMax);
         $pathOutput.text([

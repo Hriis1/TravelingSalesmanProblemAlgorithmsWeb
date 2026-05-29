@@ -122,16 +122,6 @@
                                 <span class="panel-tag">The path the solver found</span>
                             </div>
                             <div class="panel-body">
-                                <div class="coords-summary" aria-label="Output coordinate range">
-                                    <div class="coord-summary-item">
-                                        <span>Coords min</span>
-                                        <strong id="outputCoordsMin">0</strong>
-                                    </div>
-                                    <div class="coord-summary-item">
-                                        <span>Coords max</span>
-                                        <strong id="outputCoordsMax">0</strong>
-                                    </div>
-                                </div>
                                 <div class="point-board-frame">
                                     <div class="board-coord board-coord-max" id="outputBoardCoordsMax">0</div>
                                     <div class="point-board point-board-readonly" id="outputPathBoard" role="img"
