@@ -16,7 +16,7 @@
                     <div class="brand-mark" aria-hidden="true">TSP</div>
                     <div>
                         <h1>Travelling Salesman Solver</h1>
-                        <p class="subtitle">Define the problem input, then inspect the output path.</p>
+                        <p class="subtitle">Define and solve a traveling salesman problem using various algorithms.</p>
                     </div>
                 </div>
                 <div class="status-pill" aria-live="polite">
