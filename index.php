@@ -138,7 +138,24 @@
                                 <span class="panel-tag">Data about the solution</span>
                             </div>
                             <div class="panel-body">
-                                <pre class="path-output" id="pathOutput">No output path yet.</pre>
+                                <div class="solution-data-grid" aria-label="Solution data">
+                                    <div class="solution-data-field">
+                                        <span>Number of cities</span>
+                                        <strong id="solutionNCities">--</strong>
+                                    </div>
+                                    <div class="solution-data-field">
+                                        <span>Path distance</span>
+                                        <strong id="solutionDist">--</strong>
+                                    </div>
+                                    <div class="solution-data-field">
+                                        <span>Distance found by nearest neighbor</span>
+                                        <strong id="solutionNnDist">--</strong>
+                                    </div>
+                                    <div class="solution-data-field">
+                                        <span>Optimal distance</span>
+                                        <strong id="solutionOptimalDist">--</strong>
+                                    </div>
+                                </div>
                             </div>
                         </article>
                     </div>

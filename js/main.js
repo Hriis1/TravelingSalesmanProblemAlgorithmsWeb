@@ -5,11 +5,14 @@ $(function () {
     const $selectedInputType = $('#selectedInputType');
     const $problemState = $('#problemState');
     const $statusText = $('#statusText');
-    const $pathOutput = $('#pathOutput');
     const $inputBoardCoordsMin = $('#inputBoardCoordsMin');
     const $inputBoardCoordsMax = $('#inputBoardCoordsMax');
     const $outputBoardCoordsMin = $('#outputBoardCoordsMin');
     const $outputBoardCoordsMax = $('#outputBoardCoordsMax');
+    const $solutionNCities = $('#solutionNCities');
+    const $solutionDist = $('#solutionDist');
+    const $solutionNnDist = $('#solutionNnDist');
+    const $solutionOptimalDist = $('#solutionOptimalDist');
     const $solveButton = $('#solveButton');
 
     const $instanceName = $('#instanceName');
@@ -35,13 +38,29 @@ $(function () {
         $outputBoardCoordsMax.text('0');
     }
 
+    // Reset solution data to empty placeholder values
+    function resetSolutionData() {
+        $solutionNCities.text('--');
+        $solutionDist.text('--');
+        $solutionNnDist.text('--');
+        $solutionOptimalDist.text('-1');
+    }
+
+    // Write the current placeholder solution values
+    function setSolutionData(nCities, dist, nnDist, optimalDist) {
+        $solutionNCities.text(nCities);
+        $solutionDist.text(dist);
+        $solutionNnDist.text(nnDist);
+        $solutionOptimalDist.text(optimalDist);
+    }
+
     // Mirror custom coord inputs onto the input board labels
     function updateInputBoardCoords() {
         $inputBoardCoordsMin.text($coordsMin.val().trim() || '0');
         $inputBoardCoordsMax.text($coordsMax.val().trim() || '0');
     }
 
-    // Focus the first required field that has no value.
+    // Focus the first required field that has no value
     function focusFirstEmpty($fields) {
         const emptyField = $fields.toArray().find((field) => !$(field).val().trim());
 
@@ -63,7 +82,7 @@ $(function () {
         $selectedInputType.text(getInputTypeLabel(inputType));
         setProblemState('None', `${getInputTypeLabel(inputType)} selected`);
         resetOutputCoords();
-        $pathOutput.text('No output path yet.');
+        resetSolutionData();
     }
 
     // Toggle between TSP Instance and Custom TSP input
@@ -86,13 +105,7 @@ $(function () {
 
             setProblemState('Solved', 'Solution ready');
             resetOutputCoords();
-            $pathOutput.text([
-                `Input type: TSP Instance`,
-                `Instance: ${$instanceName.val().trim()}`,
-                `Algorithm: ${$instanceAlgorithm.val().trim()}`,
-                'Path: 1 -> 2 -> 3 -> ... -> 1',
-                'Total distance: --'
-            ].join('\n'));
+            setSolutionData('--', '--', '--', '--');
 
             return;
         }
@@ -114,12 +127,6 @@ $(function () {
         setProblemState('Solved', 'Solution ready');
         $outputBoardCoordsMin.text(coordsMin);
         $outputBoardCoordsMax.text(coordsMax);
-        $pathOutput.text([
-            `Input type: Custom TSP`,
-            `Algorithm: ${$customAlgorithm.val().trim()}`,
-            `Coordinate range: ${coordsMin} to ${coordsMax}`,
-            'Path: custom points will appear here after point placement is implemented',
-            'Total distance: --'
-        ].join('\n'));
+        setSolutionData('0', '--', '--', '-1');
     });
 });
