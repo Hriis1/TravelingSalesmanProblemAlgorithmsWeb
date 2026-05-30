@@ -71,6 +71,38 @@ $(function () {
         $inputBoardCoordsMax.text($coordsMax.val().trim() || '0');
     }
 
+    //Calculate padded min and max values for displaying coords on a grid
+    function getMinMaxCoords(coords) {
+        if (!Array.isArray(coords) || coords.length === 0) {
+            return {
+                min: 0,
+                max: 0,
+            };
+        }
+
+        const coordValues = coords.flatMap((coord) => [
+            Number(coord.x ?? coord[0]),
+            Number(coord.y ?? coord[1])
+        ]).filter(Number.isFinite);
+
+        if (coordValues.length === 0) {
+            return {
+                min: 0,
+                max: 0,
+            };
+        }
+
+        const lowestCoord = Math.min(...coordValues);
+        const highestCoord = Math.max(...coordValues);
+        const coordRange = highestCoord - lowestCoord;
+        const padding = coordRange > 0 ? coordRange * 0.05 : 1;
+
+        return {
+            min: Math.floor(lowestCoord - padding),
+            max: Math.ceil(highestCoord + padding),
+        };
+    }
+
     //Focus the first required field that has no value
     function focusFirstEmpty($fields) {
         const emptyField = $fields.toArray().find((field) => {
