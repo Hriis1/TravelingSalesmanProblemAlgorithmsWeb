@@ -58,8 +58,6 @@
                                     <option value="bays29">bays29</option>
                                     <option value="berlin52">berlin52</option>
                                     <option value="bier127">bier127</option>
-                                    <option value="brazil58">brazil58</option>
-                                    <option value="brg180">brg180</option>
                                     <option value="burma14">burma14</option>
                                     <option value="ch130">ch130</option>
                                     <option value="ch150">ch150</option>
@@ -75,12 +73,7 @@
                                     <option value="fl417">fl417</option>
                                     <option value="fl1400">fl1400</option>
                                     <option value="fnl4461">fnl4461</option>
-                                    <option value="fri26">fri26</option>
                                     <option value="gil262">gil262</option>
-                                    <option value="gr17">gr17</option>
-                                    <option value="gr21">gr21</option>
-                                    <option value="gr24">gr24</option>
-                                    <option value="gr48">gr48</option>
                                     <option value="gr96">gr96</option>
                                     <option value="gr120">gr120</option>
                                     <option value="gr137">gr137</option>
@@ -88,7 +81,6 @@
                                     <option value="gr229">gr229</option>
                                     <option value="gr431">gr431</option>
                                     <option value="gr666">gr666</option>
-                                    <option value="hk48">hk48</option>
                                     <option value="kroa100">kroa100</option>
                                     <option value="krob100">krob100</option>
                                     <option value="kroc100">kroc100</option>
@@ -129,11 +121,7 @@
                                     <option value="rl1304">rl1304</option>
                                     <option value="rl1323">rl1323</option>
                                     <option value="rl1889">rl1889</option>
-                                    <option value="si175">si175</option>
-                                    <option value="si535">si535</option>
-                                    <option value="si1032">si1032</option>
                                     <option value="st70">st70</option>
-                                    <option value="swiss42">swiss42</option>
                                     <option value="ts225">ts225</option>
                                     <option value="tsp225">tsp225</option>
                                     <option value="u159">u159</option>
