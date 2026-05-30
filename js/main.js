@@ -29,6 +29,9 @@ $(function () {
         algorithm: null,
     };
 
+    //coords for the loaded tsp
+    let tspCoords = [];
+
     //Display names for the two supported input modes
     function getInputTypeLabel(inputType) {
         return inputType === 'custom' ? 'Custom TSP' : 'TSP Instance';
@@ -70,7 +73,11 @@ $(function () {
 
     //Focus the first required field that has no value
     function focusFirstEmpty($fields) {
-        const emptyField = $fields.toArray().find((field) => !$(field).val().trim());
+        const emptyField = $fields.toArray().find((field) => {
+            const fieldValue = $(field).val();
+
+            return !String(fieldValue ?? '').trim();
+        });
 
         if (emptyField) {
             $(emptyField).trigger('focus');
@@ -125,22 +132,55 @@ $(function () {
     $loadTspButton.on('click', function () {
         const inputType = $inputTypes.filter(':checked').val();
 
-        if (inputType !== 'instance') {
+        if (inputType == 'instance') { //tsp instance input
+            //if there are unfilled fields
+            if (focusFirstEmpty($instanceName.add($instanceAlgorithm))) {
+                setProblemState('Missing input', 'Enter instance and algorithm');
+                return;
+            }
+
+            //build the req body for sending to the tsp solver api
+            tspRequestBody = buildTspReqBody();
+
+            //Reset coords
+            tspCoords = [];
+
+            //load the tsp coords for display
+            $.ajax({
+                url: 'backend/tspApi/tspApiController.php',
+                type: 'GET',
+                data: {
+                    action: 'getTspInstanceCoords',
+                    instance: $instanceName.val()
+                },
+                dataType: 'json',
+                success: function (result) {
+                    //Error with loading coords
+                    if (result.success == false) {
+                        setProblemState('Error loading tsp', result.error);
+                        return
+                    }
+
+                    //Success wolading coords
+                    tspCoords = result.coords
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                    setProblemState('Error loading tsp', 'Could not load instance coords');
+                    return;
+                }
+            });
+
+            setProblemState('Loaded', 'TSP loaded');
+            resetOutputCoords();
+            resetSolutionData();
+        } else if (inputType == 'custom') { //custom tsp input
             setProblemState('Not loaded', 'Custom TSP loading is not implemented yet');
             return;
-        }
-
-        if (focusFirstEmpty($instanceName.add($instanceAlgorithm))) {
-            setProblemState('Missing input', 'Enter instance and algorithm');
+        } else { //input type not recognized
+            setProblemState('Not loaded', 'Unrecognized input type');
             return;
         }
-
-        tspRequestBody = buildTspReqBody();
-        console.log(tspRequestBody);
-
-        setProblemState('Loaded', 'TSP loaded');
-        resetOutputCoords();
-        resetSolutionData();
     });
 
     //Write placeholder solution output after a request body is loaded
