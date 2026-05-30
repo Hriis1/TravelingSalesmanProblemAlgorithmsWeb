@@ -109,6 +109,12 @@ $(function () {
         };
     }
 
+    //Reset grid
+    function resetGrid(gridId) {
+        const $grid = $(gridId.startsWith('#') ? gridId : `#${gridId}`);
+        $grid.find('.grid-point').remove();
+    }
+
     //Draw coord points inside a grid using padded min and max bounds
     function drawPointsOnGrid(gridId, coords) {
         const $grid = $(gridId.startsWith('#') ? gridId : `#${gridId}`);
@@ -117,7 +123,7 @@ $(function () {
         const coordRange = max - min || 1;
 
         //Clear old points before drawing new ones
-        $grid.find('.grid-point').remove();
+        resetGrid(gridId);
 
         //Update labels that belong to the same board frame
         $grid.closest('.point-board-frame').find('.board-coord-min').text(min);
@@ -231,6 +237,7 @@ $(function () {
                 success: function (result) {
                     //Error with loading coords
                     if (result.success == false) {
+                        resetGrid('instancePointBoard');
                         setProblemState('Error loading tsp', result.error);
                         return
                     }
@@ -238,18 +245,17 @@ $(function () {
                     //Success wolading coords
                     tspCoords = result.coords
                     drawPointsOnGrid('instancePointBoard', tspCoords);
-                    console.log(tspCoords);
+                    setProblemState('Loaded', 'TSP loaded');
+                    resetOutputCoords();
+                    resetSolutionData();
                 },
                 error: function (xhr) {
                     console.log(xhr.responseText);
+                    resetGrid('instancePointBoard');
                     setProblemState('Error loading tsp', 'Could not load instance coords');
                     return;
                 }
             });
-
-            setProblemState('Loaded', 'TSP loaded');
-            resetOutputCoords();
-            resetSolutionData();
         } else if (inputType == 'custom') { //custom tsp input
             setProblemState('Not loaded', 'Custom TSP loading is not implemented yet');
             return;
