@@ -148,6 +148,17 @@
                                     <option value="lkh">lkh</option>
                                 </select>
                             </div>
+
+                            <div class="field">
+                                <label>Problem definition</label>
+                                <div class="point-board-frame">
+                                    <div class="board-coord board-coord-max" id="instanceBoardCoordsMax">0</div>
+                                    <div class="point-board point-board-readonly" id="instancePointBoard" role="img"
+                                        aria-label="Loaded TSP instance point display area">
+                                    </div>
+                                    <div class="board-coord board-coord-min" id="instanceBoardCoordsMin">0</div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="input-panel" id="customInputPanel" data-input-panel="custom">
