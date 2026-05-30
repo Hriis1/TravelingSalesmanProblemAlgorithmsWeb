@@ -73,6 +73,7 @@ $(function () {
 
     //Calculate padded min and max values for displaying coords on a grid
     function getMinMaxCoords(coords) {
+        //Return defaults when no coords exist
         if (!Array.isArray(coords) || coords.length === 0) {
             return {
                 min: 0,
@@ -80,11 +81,13 @@ $(function () {
             };
         }
 
+        //Collect all x and y values from supported coord shapes
         const coordValues = coords.flatMap((coord) => [
             Number(coord.x ?? coord[0]),
             Number(coord.y ?? coord[1])
         ]).filter(Number.isFinite);
 
+        //Return defaults when coords cannot be parsed
         if (coordValues.length === 0) {
             return {
                 min: 0,
@@ -95,12 +98,51 @@ $(function () {
         const lowestCoord = Math.min(...coordValues);
         const highestCoord = Math.max(...coordValues);
         const coordRange = highestCoord - lowestCoord;
+
+        //Add space around the outer points
         const padding = coordRange > 0 ? coordRange * 0.05 : 1;
 
+        //Round outward so every point fits inside the grid
         return {
-            min: Math.floor(lowestCoord - padding),
+            min: Math.max(0, Math.floor(lowestCoord - padding)),
             max: Math.ceil(highestCoord + padding),
         };
+    }
+
+    //Draw coord points inside a grid using padded min and max bounds
+    function drawPointsOnGrid(gridId, coords) {
+        const $grid = $(gridId.startsWith('#') ? gridId : `#${gridId}`);
+        const safeCoords = Array.isArray(coords) ? coords : [];
+        const { min, max } = getMinMaxCoords(safeCoords);
+        const coordRange = max - min || 1;
+
+        //Clear old points before drawing new ones
+        $grid.find('.grid-point').remove();
+
+        //Update labels that belong to the same board frame
+        $grid.closest('.point-board-frame').find('.board-coord-min').text(min);
+        $grid.closest('.point-board-frame').find('.board-coord-max').text(max);
+
+        //Place every valid point inside the grid
+        safeCoords.forEach((coord) => {
+            const x = Number(coord.x ?? coord[0]);
+            const y = Number(coord.y ?? coord[1]);
+
+            if (!Number.isFinite(x) || !Number.isFinite(y)) {
+                return;
+            }
+
+            const leftPercent = ((x - min) / coordRange) * 100;
+            const topPercent = (1 - ((y - min) / coordRange)) * 100;
+
+            $('<div>')
+                .addClass('grid-point')
+                .css({
+                    left: `${leftPercent}%`,
+                    top: `${topPercent}%`,
+                })
+                .appendTo($grid);
+        });
     }
 
     //Focus the first required field that has no value
@@ -195,6 +237,8 @@ $(function () {
 
                     //Success wolading coords
                     tspCoords = result.coords
+                    drawPointsOnGrid('instancePointBoard', tspCoords);
+                    console.log(tspCoords);
                 },
                 error: function (xhr) {
                     console.log(xhr.responseText);

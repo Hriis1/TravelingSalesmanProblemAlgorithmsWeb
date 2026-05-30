@@ -511,6 +511,18 @@ h3 {
     font-weight: 800;
 }
 
+.grid-point {
+    position: absolute;
+    z-index: 2;
+    width: 7px;
+    height: 7px;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    background: var(--primary);
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.22);
+    transform: translate(-50%, -50%);
+}
+
 .point-board-readonly {
     border-style: solid;
     cursor: default;
