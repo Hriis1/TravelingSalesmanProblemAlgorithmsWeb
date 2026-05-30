@@ -1,9 +1,32 @@
 <?php
 
-class tspApiService
+namespace App\Services;
+class TspApiService
 {
-    public function solveTsp(array $tspRequestBody)
+    public function getInstanceCoords(string $instanceName): array
     {
+        //Send req
+        $ch = curl_init('http://localhost:8080/getTspInstanceCoords?instance=' . urlencode($instanceName));
+
+        curl_setopt_array($ch, [
+            CURLOPT_HTTPGET => true,
+            CURLOPT_RETURNTRANSFER => true,
+        ]);
+
+        $response = curl_exec($ch);
+
+        if ($response === false) {
+            return ["success" => false, "error" => "Error sending request to tsp api"];
+        }
+
+        $decodedResponse = json_decode($response, true);
+
+        return $decodedResponse;
+    }
+
+    public function solveTsp(array $tspRequestBody): array
+    {
+        //Send req
         $ch = curl_init('http://localhost:8080/solveTSP');
 
         curl_setopt_array($ch, [
@@ -18,18 +41,11 @@ class tspApiService
         $response = curl_exec($ch);
 
         if ($response === false) {
-            return [0, "Error sending request to tsp api"];
+            return ["success" => false, "error" => "Error sending request to tsp api"];
         }
 
         $decodedResponse = json_decode($response, true);
 
-        //If api solve succe
-        if ($decodedResponse["success"] == true) {
-            //Return the response
-            return [1, $decodedResponse];
-        }
-
-        //Api solve error
-        return [0, $decodedResponse["error"]];
+        return $decodedResponse;
     }
 }

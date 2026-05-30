@@ -138,7 +138,7 @@ $(function () {
         tspRequestBody = buildTspReqBody();
         console.log(tspRequestBody);
 
-        setProblemState('Loaded', 'TSP request body built');
+        setProblemState('Loaded', 'TSP loaded');
         resetOutputCoords();
         resetSolutionData();
     });
