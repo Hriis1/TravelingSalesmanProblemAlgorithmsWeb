@@ -275,6 +275,15 @@
         </section>
     </main>
 
+    <div class="solve-modal" id="solveModal" aria-hidden="true">
+        <div class="solve-modal-card" role="dialog" aria-modal="true" aria-labelledby="solveModalTitle">
+            <button class="solve-modal-close" type="button" id="cancelSolveButton" aria-label="Cancel solve">x</button>
+            <h2 id="solveModalTitle">Solving TSP</h2>
+            <p class="solve-modal-status" id="solveModalStatus">Solving TSP using -- algorithm for 0 secs</p>
+            <p class="solve-modal-note">This may take a while</p>
+        </div>
+    </div>
+
     <?php require_once __DIR__ . "/scripts.php"; ?>
 
     <script src="js/main.js"></script>

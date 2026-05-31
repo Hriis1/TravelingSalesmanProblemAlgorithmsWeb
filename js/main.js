@@ -16,6 +16,9 @@ $(function () {
     const $solutionOptimalIncrease = $('#solutionOptimalIncrease');
     const $loadTspButton = $('#loadButton');
     const $solveTspButton = $('#solveButton');
+    const $solveModal = $('#solveModal');
+    const $solveModalStatus = $('#solveModalStatus');
+    const $cancelSolveButton = $('#cancelSolveButton');
 
     const $instanceName = $('#instanceName');
     const $instanceAlgorithm = $('#instanceAlgorithm');
@@ -32,6 +35,12 @@ $(function () {
 
     //coords for the loaded tsp
     let tspCoords = [];
+
+    //State for the current solve request
+    let solveRequest = null;
+    let solveTimer = null;
+    let solveStartedAt = null;
+    let solveWasCancelled = false;
 
     //Display names for the two supported input modes
     function getInputTypeLabel(inputType) {
@@ -78,6 +87,42 @@ $(function () {
         }
 
         return `${(((numericDist - numericOptimalDist) / numericOptimalDist) * 100).toFixed(2)}%`;
+    }
+
+    //Format elapsed solve time as seconds or minutes
+    function formatSolveElapsed(totalSeconds) {
+        if (totalSeconds < 60) {
+            return `${totalSeconds} secs`;
+        }
+
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        return `${minutes} mins ${seconds} secs`;
+    }
+
+    //Update the solving modal elapsed time
+    function updateSolveModalStatus() {
+        const elapsedSeconds = Math.floor((Date.now() - solveStartedAt) / 1000);
+        const algorithm = tspRequestBody.algorithm || '--';
+
+        $solveModalStatus.text(`Solving TSP using ${algorithm} algorithm for ${formatSolveElapsed(elapsedSeconds)}`);
+    }
+
+    //Show the solving modal and start its timer
+    function showSolveModal() {
+        solveStartedAt = Date.now();
+        updateSolveModalStatus();
+        $solveModal.addClass('active').attr('aria-hidden', 'false');
+        solveTimer = setInterval(updateSolveModalStatus, 1000);
+    }
+
+    //Hide the solving modal and stop its timer
+    function hideSolveModal() {
+        clearInterval(solveTimer);
+        solveTimer = null;
+        solveStartedAt = null;
+        $solveModal.removeClass('active').attr('aria-hidden', 'true');
     }
 
     //Mirror custom coord inputs onto the input board labels
@@ -263,6 +308,19 @@ $(function () {
     //Update board labels while the user edits the coordinate range
     $coordsMin.add($coordsMax).on('input', updateInputBoardCoords);
 
+    //Abort the active solve request when the modal is closed
+    $cancelSolveButton.on('click', function () {
+        if (!solveRequest) {
+            hideSolveModal();
+            return;
+        }
+
+        solveWasCancelled = true;
+        solveRequest.abort();
+        hideSolveModal();
+        setProblemState('Cancelled', 'Solve cancelled');
+    });
+
     //Build the body that will be sent to api
     function buildTspReqBody() {
         const inputType = $inputTypes.filter(':checked').val();
@@ -343,6 +401,10 @@ $(function () {
 
     //Solve tsp
     $solveTspButton.on('click', function () {
+        if (solveRequest) {
+            setProblemState('Solving', 'Solve already running');
+            return;
+        }
 
         //Reset solution
         resetGrid('outputPathBoard');
@@ -356,7 +418,11 @@ $(function () {
         }
 
         //Send the req to solve tsp
-        $.ajax({
+        solveWasCancelled = false;
+        showSolveModal();
+        setProblemState('Solving', 'Solve in progress');
+
+        solveRequest = $.ajax({
             url: 'backend/tspApi/tspApiController.php',
             type: 'POST',
             data: {
@@ -386,12 +452,23 @@ $(function () {
                 setProblemState('Solved', 'Solution ready');
                 setSolutionData(nCities, dist, nnDist, optimalDist, optimalIncrease);
             },
-            error: function (xhr) {
+            error: function (xhr, textStatus) {
+                if (textStatus == 'abort') {
+                    return;
+                }
+
                 console.log(xhr.responseText);
                 resetGrid('outputPathBoard');
                 setSolutionData('--', '--', '--', '--');
                 setProblemState('Error loading TSP', 'Could not load instance coords');
                 return;
+            },
+            complete: function () {
+                solveRequest = null;
+
+                if (!solveWasCancelled) {
+                    hideSolveModal();
+                }
             }
         });
     });
