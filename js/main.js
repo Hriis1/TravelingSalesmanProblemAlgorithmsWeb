@@ -225,7 +225,7 @@ $(function () {
             //Reset coords
             tspCoords = [];
 
-            //load the tsp coords for display
+            //Send the req to load the tsp coords for display
             $.ajax({
                 url: 'backend/tspApi/tspApiController.php',
                 type: 'GET',
@@ -245,17 +245,18 @@ $(function () {
                     //Success wolading coords
                     tspCoords = result.coords
                     drawPointsOnGrid('instancePointBoard', tspCoords);
-                    setProblemState('Loaded', 'TSP loaded');
+                    setProblemState('TSP Loaded', 'Loaded');
                     resetOutputCoords();
                     resetSolutionData();
                 },
                 error: function (xhr) {
                     console.log(xhr.responseText);
                     resetGrid('instancePointBoard');
-                    setProblemState('Error loading tsp', 'Could not load instance coords');
+                    setProblemState('Error loading TSP', 'Could not load instance coords');
                     return;
                 }
             });
+
         } else if (inputType == 'custom') { //custom tsp input
             setProblemState('Not loaded', 'Custom TSP loading is not implemented yet');
             return;
@@ -265,15 +266,56 @@ $(function () {
         }
     });
 
-    //Write placeholder solution output after a request body is loaded
+    //Solve tsp
     $solveTspButton.on('click', function () {
-        if (!tspRequestBody.inputType) {
-            setProblemState('Not loaded', 'Load TSP first');
+
+        //Reset solution
+        resetGrid('outputPathBoard');
+        setSolutionData('--', '--', '--', '--');
+
+        //Check if tsp is loaded correctly
+        if (!tspRequestBody.inputType || !tspCoords) {
+            console.log(tspRequestBody, tspCoords)
+            setProblemState('Not loaded', 'Load TSP before solving');
             return;
         }
 
-        setProblemState('Solved', 'Solution ready');
-        setSolutionData('--', '--', '--', '--');
+        //Send the req to solve tsp
+        $.ajax({
+            url: 'backend/tspApi/tspApiController.php',
+            type: 'POST',
+            data: {
+                action: 'solveTsp',
+                tspRequestBody: JSON.stringify(tspRequestBody)
+            },
+            dataType: 'json',
+            success: function (result) {
+                console.log(result);
+                //Error with loading coords
+                if (result.success == false) {
+                    resetGrid('outputPathBoard');
+                    setSolutionData('--', '--', '--', '--');
+                    setProblemState('Error solving tsp', result.error);
+                    return
+                }
+
+                //Success wolading coords
+                const nCities = result.nCities;
+                const dist = result.dist;
+                const nnDist = result.nnDist;
+                const optimalDist = result.optimalDist > 0 ? result.optimalDist : '-';
+                drawPointsOnGrid('outputPathBoard', tspCoords);
+                setProblemState('Solved', 'Solution ready');
+                setSolutionData(nCities, dist, nnDist, optimalDist);
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                resetGrid('outputPathBoard');
+                setSolutionData('--', '--', '--', '--');
+                setProblemState('Error loading TSP', 'Could not load instance coords');
+                return;
+            }
+        });
     });
 
 });

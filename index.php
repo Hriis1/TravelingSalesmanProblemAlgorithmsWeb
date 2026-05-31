@@ -251,7 +251,7 @@
                                         <strong id="solutionNCities">--</strong>
                                     </div>
                                     <div class="solution-data-field">
-                                        <span>Path distance</span>
+                                        <span>Distance found by solver</span>
                                         <strong id="solutionDist">--</strong>
                                     </div>
                                     <div class="solution-data-field">
