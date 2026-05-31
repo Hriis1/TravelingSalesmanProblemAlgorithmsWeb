@@ -72,6 +72,22 @@ $(function () {
         $solutionOptimalIncrease.text('--');
     }
 
+    //Reset the loaded tsp state when input mode changes
+    function resetLoadedTspState() {
+        tspRequestBody = {
+            inputType: null,
+            instance: null,
+            algorithm: null,
+        };
+        tspCoords = [];
+        customTspCoords = [];
+        resetGrid('instancePointBoard');
+        resetGrid('customPointBoard');
+        resetGrid('outputPathBoard');
+        resetOutputCoords();
+        resetSolutionData();
+    }
+
     //Write the current placeholder solution values
     function setSolutionData(nCities, dist, nnDist, optimalDist, optimalIncrease = '--') {
         $solutionNCities.text(nCities);
@@ -312,8 +328,7 @@ $(function () {
 
         $selectedInputType.text(getInputTypeLabel(inputType));
         setProblemState('None', `${getInputTypeLabel(inputType)} selected`);
-        resetOutputCoords();
-        resetSolutionData();
+        resetLoadedTspState();
     }
 
     //Toggle between TSP Instance and Custom TSP input
