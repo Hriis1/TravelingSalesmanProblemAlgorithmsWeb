@@ -26,6 +26,8 @@ $(function () {
     const $coordsMin = $('#coordsMin');
     const $coordsMax = $('#coordsMax');
     const $customPointBoard = $('#customPointBoard');
+    const $customFileAlgorithm = $('#customFileAlgorithm');
+    const $customTspFile = $('#customTspFile');
 
     //Base Req body representation that will be sent to api
     let tspRequestBody = {
@@ -40,15 +42,26 @@ $(function () {
     //coords placed by the user for custom tsp
     let customTspCoords = [];
 
+    //contents of the selected custom tsp file
+    let customTspFileContents = '';
+
     //State for the current solve request
     let solveRequest = null;
     let solveTimer = null;
     let solveStartedAt = null;
     let solveWasCancelled = false;
 
-    //Display names for the two supported input modes
+    //Display names for the supported input modes
     function getInputTypeLabel(inputType) {
-        return inputType === 'custom' ? 'Custom TSP' : 'TSP Instance';
+        if (inputType === 'custom') {
+            return 'Custom TSP';
+        }
+
+        if (inputType === 'customTSPFile') {
+            return 'Custom TSP File';
+        }
+
+        return 'TSP Instance';
     }
 
     //Keep the status pill and problem state in sync
@@ -81,8 +94,10 @@ $(function () {
         };
         tspCoords = [];
         customTspCoords = [];
+        customTspFileContents = '';
         resetGrid('instancePointBoard');
         resetGrid('customPointBoard');
+        resetGrid('customFilePointBoard');
         resetGrid('outputPathBoard');
         resetOutputCoords();
         resetSolutionData();
@@ -318,6 +333,32 @@ $(function () {
         return Boolean(emptyField);
     }
 
+    //Read the selected custom tsp file as text
+    function readCustomTspFile() {
+        const file = $customTspFile[0].files[0];
+
+        return new Promise((resolve, reject) => {
+            if (!file) {
+                reject('No file selected');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            //Return file contents after the browser finishes reading
+            reader.onload = function (event) {
+                resolve(event.target.result);
+            };
+
+            //Surface file read errors to the load handler
+            reader.onerror = function () {
+                reject('Could not read selected file');
+            };
+
+            reader.readAsText(file);
+        });
+    }
+
     //Show only the form fields for the selected input type
     function switchInputType(inputType) {
         $typeOptions.removeClass('active');
@@ -331,7 +372,7 @@ $(function () {
         resetLoadedTspState();
     }
 
-    //Toggle between TSP Instance and Custom TSP input
+    //Toggle between the available input modes
     $inputTypes.on('change', function () {
         switchInputType($(this).val());
     });
@@ -341,6 +382,27 @@ $(function () {
         updateInputBoardCoords();
         customTspCoords = [];
         resetGrid('customPointBoard');
+    });
+
+    //Invalidate loaded custom file data when the chosen file changes
+    $customTspFile.on('change', function () {
+        customTspFileContents = '';
+
+        if (tspRequestBody.inputType != 'customTSPFile') {
+            return;
+        }
+
+        tspRequestBody = {
+            inputType: null,
+            instance: null,
+            algorithm: null,
+        };
+        tspCoords = [];
+        resetGrid('customFilePointBoard');
+        resetGrid('outputPathBoard');
+        resetOutputCoords();
+        resetSolutionData();
+        setProblemState('Not loaded', 'Load TSP file before solving');
     });
 
     //Add a custom point where the user clicks on the board
@@ -403,11 +465,18 @@ $(function () {
                     cities: tspCoords
                 }
             };
+        } else if (inputType == 'customTSPFile') {
+            //Load custom tsp file
+            return {
+                inputType: inputType,
+                algorithm: $customFileAlgorithm.val(),
+                customTSPFile: customTspFileContents
+            };
         }
     }
 
     //Validate and store the instance request body
-    $loadTspButton.on('click', function () {
+    $loadTspButton.on('click', async function () {
         const inputType = $inputTypes.filter(':checked').val();
 
         if (inputType == 'instance') { //tsp instance input
@@ -484,6 +553,60 @@ $(function () {
             resetSolutionData();
             setProblemState('Loaded', 'Custom TSP loaded');
             return;
+        } else if (inputType == 'customTSPFile') { //custom tsp file input
+
+            //Validate
+            if (focusFirstEmpty($customFileAlgorithm.add($customTspFile))) {
+                setProblemState('Missing input', 'Enter algorithm and choose a TSP file');
+                return;
+            }
+
+            try {
+                //Read file contents before building the request body
+                customTspFileContents = await readCustomTspFile();
+            } catch (error) {
+                setProblemState('Error loading file', error);
+                return;
+            }
+
+            //build the req body for sending to the tsp solver api
+            tspRequestBody = buildTspReqBody();
+
+            //Reset coords
+            tspCoords = [];
+
+            //Send the req to load the tsp file coords for display
+            $.ajax({
+                url: 'backend/tspApi/tspApiController.php',
+                type: 'POST',
+                data: {
+                    action: 'getTspCustomFileCoords',
+                    tspRequestBody: JSON.stringify(tspRequestBody)
+                },
+                dataType: 'json',
+                success: function (result) {
+                    //Error with loading coords
+                    if (result.success == false) {
+                        resetGrid('customFilePointBoard');
+                        setProblemState('Error loading tsp', result.error);
+                        return
+                    }
+
+                    //Success loading coords
+                    tspCoords = result.coords
+                    drawPointsOnGrid('customFilePointBoard', tspCoords);
+                    resetGrid('outputPathBoard');
+                    resetOutputCoords();
+                    resetSolutionData();
+                    setProblemState('TSP Loaded', 'Custom TSP file loaded');
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                    resetGrid('customFilePointBoard');
+                    setProblemState('Error loading TSP', 'Could not load custom file coords');
+                    return;
+                }
+            });
         } else { //input type not recognized
             setProblemState('Not loaded', 'Unrecognized input type');
             return;
@@ -502,7 +625,7 @@ $(function () {
         setSolutionData('--', '--', '--', '--');
 
         //Check if tsp is loaded correctly
-        if (!tspRequestBody.inputType || !tspCoords) {
+        if (!tspRequestBody.inputType || tspCoords.length === 0) {
             console.log(tspRequestBody, tspCoords)
             setProblemState('Not loaded', 'Load TSP before solving');
             return;

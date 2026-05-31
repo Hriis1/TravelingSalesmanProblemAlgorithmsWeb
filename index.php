@@ -42,6 +42,10 @@
                             <input type="radio" id="inputTypeCustom" name="inputType" value="custom">
                             <span>Custom TSP</span>
                         </label>
+                        <label class="type-option" for="inputTypeCustomFile">
+                            <input type="radio" id="inputTypeCustomFile" name="inputType" value="customTSPFile">
+                            <span>Custom TSP File</span>
+                        </label>
                     </div>
 
                     <form id="tspForm">
@@ -192,6 +196,34 @@
                                         aria-label="Custom TSP point placement area">
                                     </div>
                                     <div class="board-coord board-coord-min" id="inputBoardCoordsMin">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-panel" id="customFileInputPanel" data-input-panel="customTSPFile">
+                            <div class="field">
+                                <label for="customFileAlgorithm">Algorithm</label>
+                                <select id="customFileAlgorithm" name="customFileAlgorithm">
+                                    <option value="" selected disabled>-- Chouse an algorithm --</option>
+                                    <option value="genetic">genetic</option>
+                                    <option value="mmas">mmas</option>
+                                    <option value="lkh">lkh</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label for="customTspFile">TSP file</label>
+                                <input type="file" id="customTspFile" name="customTspFile" accept=".tsp,.txt">
+                            </div>
+
+                            <div class="field">
+                                <label>Problem definition</label>
+                                <div class="point-board-frame">
+                                    <div class="board-coord board-coord-max" id="customFileBoardCoordsMax">0</div>
+                                    <div class="point-board point-board-readonly" id="customFilePointBoard" role="img"
+                                        aria-label="Custom TSP file point display area">
+                                    </div>
+                                    <div class="board-coord board-coord-min" id="customFileBoardCoordsMin">0</div>
                                 </div>
                             </div>
                         </div>
