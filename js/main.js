@@ -25,6 +25,7 @@ $(function () {
     const $customAlgorithm = $('#customAlgorithm');
     const $coordsMin = $('#coordsMin');
     const $coordsMax = $('#coordsMax');
+    const $customPointBoard = $('#customPointBoard');
 
     //Base Req body representation that will be sent to api
     let tspRequestBody = {
@@ -35,6 +36,9 @@ $(function () {
 
     //coords for the loaded tsp
     let tspCoords = [];
+
+    //coords placed by the user for custom tsp
+    let customTspCoords = [];
 
     //State for the current solve request
     let solveRequest = null;
@@ -131,6 +135,18 @@ $(function () {
         $inputBoardCoordsMax.text($coordsMax.val().trim() || '0');
     }
 
+    //Read and validate the custom coord range
+    function getCustomCoordBounds() {
+        const min = Number($coordsMin.val());
+        const max = Number($coordsMax.val());
+
+        if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) {
+            return null;
+        }
+
+        return { min, max };
+    }
+
     //Calculate padded min and max values for displaying coords on a grid
     function getMinMaxCoords(coords) {
         //Return defaults when no coords exist
@@ -191,10 +207,10 @@ $(function () {
     }
 
     //Draw coord points inside a grid using padded min and max bounds
-    function drawPointsOnGrid(gridId, coords, shouldResetGrid = true) {
+    function drawPointsOnGrid(gridId, coords, shouldResetGrid = true, coordBounds = null) {
         const $grid = $(gridId.startsWith('#') ? gridId : `#${gridId}`);
         const safeCoords = Array.isArray(coords) ? coords : [];
-        const { min, max } = getMinMaxCoords(safeCoords);
+        const { min, max } = coordBounds ?? getMinMaxCoords(safeCoords);
         const coordRange = max - min || 1;
 
         //Clear old points before drawing new ones
@@ -227,11 +243,11 @@ $(function () {
     }
 
     //Draw only the path edges and close it back to the first city
-    function drawPathOnGrid(gridId, coords, path) {
+    function drawPathOnGrid(gridId, coords, path, coordBounds = null) {
         const $grid = $(gridId.startsWith('#') ? gridId : `#${gridId}`);
         const safeCoords = Array.isArray(coords) ? coords : [];
         const safePath = Array.isArray(path) ? path : [];
-        const { min, max } = getMinMaxCoords(safeCoords);
+        const { min, max } = coordBounds ?? getMinMaxCoords(safeCoords);
         const coordRange = max - min || 1;
 
         //Start from a clean grid with the same bounds as points
@@ -306,7 +322,37 @@ $(function () {
     });
 
     //Update board labels while the user edits the coordinate range
-    $coordsMin.add($coordsMax).on('input', updateInputBoardCoords);
+    $coordsMin.add($coordsMax).on('input', function () {
+        updateInputBoardCoords();
+        customTspCoords = [];
+        resetGrid('customPointBoard');
+    });
+
+    //Add a custom point where the user clicks on the board
+    $customPointBoard.on('click', function (event) {
+        const coordBounds = getCustomCoordBounds();
+
+        if (!coordBounds) {
+            setProblemState('Missing input', 'Enter valid coords min and max');
+            return;
+        }
+
+        const boardOffset = $customPointBoard.offset();
+        const boardWidth = $customPointBoard.width();
+        const boardHeight = $customPointBoard.height();
+        const clickX = event.pageX - boardOffset.left;
+        const clickY = event.pageY - boardOffset.top;
+        const coordRange = coordBounds.max - coordBounds.min;
+        const coordX = coordBounds.min + (clickX / boardWidth) * coordRange;
+        const coordY = coordBounds.max - (clickY / boardHeight) * coordRange;
+
+        customTspCoords.push([
+            Math.round(coordX),
+            Math.round(coordY)
+        ]);
+
+        drawPointsOnGrid('customPointBoard', customTspCoords, true, coordBounds);
+    });
 
     //Abort the active solve request when the modal is closed
     $cancelSolveButton.on('click', function () {
@@ -325,20 +371,24 @@ $(function () {
     function buildTspReqBody() {
         const inputType = $inputTypes.filter(':checked').val();
 
-        //Load an instance
         if (inputType === 'instance') {
+            //Load an instance
             return {
-                inputType: 'instance',
+                inputType: inputType,
                 instance: $instanceName.val(),
                 algorithm: $instanceAlgorithm.val()
             };
+        } else if (inputType == 'custom') {
+            //Load custom
+            return {
+                inputType: inputType,
+                algorithm: $customAlgorithm.val(),
+                customTSP: {
+                    numCities: tspCoords.length,
+                    cities: tspCoords
+                }
+            };
         }
-
-        //TODO custom
-        return {
-            inputType: 'customTSP',
-            algorithm: $customAlgorithm.val(),
-        };
     }
 
     //Validate and store the instance request body
@@ -391,7 +441,33 @@ $(function () {
             });
 
         } else if (inputType == 'custom') { //custom tsp input
-            setProblemState('Not loaded', 'Custom TSP loading is not implemented yet');
+
+            //Validate
+            if (focusFirstEmpty($customAlgorithm.add($coordsMin).add($coordsMax))) {
+                setProblemState('Missing input', 'Enter algorithm and coordinate range');
+                return;
+            }
+            const coordBounds = getCustomCoordBounds();
+            if (!coordBounds) {
+                setProblemState('Invalid input', 'Enter valid minimum and maximum');
+                return;
+            }
+            if (customTspCoords.length === 0) {
+                setProblemState('Missing input', 'Add custom points before loading');
+                return;
+            }
+
+            //Build the coords
+            tspCoords = customTspCoords.map((coord) => [...coord]);
+
+            //build the req body for sending to the tsp solver api
+            tspRequestBody = buildTspReqBody();
+
+            drawPointsOnGrid('customPointBoard', customTspCoords, true, coordBounds);
+            resetGrid('outputPathBoard');
+            resetOutputCoords();
+            resetSolutionData();
+            setProblemState('Loaded', 'Custom TSP loaded');
             return;
         } else { //input type not recognized
             setProblemState('Not loaded', 'Unrecognized input type');
@@ -416,6 +492,8 @@ $(function () {
             setProblemState('Not loaded', 'Load TSP before solving');
             return;
         }
+
+        const inputType = tspRequestBody.inputType;
 
         //Send the req to solve tsp
         solveWasCancelled = false;
@@ -447,8 +525,9 @@ $(function () {
                 const optimalDist = result.optimalDist > 0 ? result.optimalDist : '--';
                 const optimalIncrease = getOptimalIncreasePercent(dist, result.optimalDist);
                 const path = result.path;
-                drawPathOnGrid('outputPathBoard', tspCoords, path);
-                drawPointsOnGrid('outputPathBoard', tspCoords, false);
+                const coordBounds = inputType == 'custom' ? getCustomCoordBounds() : null;
+                drawPathOnGrid('outputPathBoard', tspCoords, path, coordBounds);
+                drawPointsOnGrid('outputPathBoard', tspCoords, false, coordBounds);
                 setProblemState('Solved', 'Solution ready');
                 setSolutionData(nCities, dist, nnDist, optimalDist, optimalIncrease);
             },
