@@ -15,6 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (($_POST["action"] ?? "") == "getTspCustomFileCoords") {
+        $tspRequestBody = json_decode($_POST['tspRequestBody'] ?? '[]', true);
+
+        if (!is_array($tspRequestBody)) {
+            echo json_encode(["success" => false, "error" => "Invalid TSP request body"]);
+            return;
+        }
+
+        echo json_encode($tspApiService->getTspCustomFileCoords($tspRequestBody));
+        exit;
+    }
+
     if (($_POST["action"] ?? "") == "solveTsp") {
         $tspRequestBody = json_decode($_POST['tspRequestBody'] ?? '[]', true);
 
@@ -25,5 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         echo json_encode($tspApiService->solveTsp($tspRequestBody));
+        exit;
     }
 }
