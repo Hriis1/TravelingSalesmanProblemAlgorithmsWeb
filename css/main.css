@@ -511,9 +511,18 @@ h3 {
     font-weight: 800;
 }
 
-.grid-point {
+.grid-path-edge {
     position: absolute;
     z-index: 2;
+    height: 2px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.62);
+    transform-origin: left center;
+}
+
+.grid-point {
+    position: absolute;
+    z-index: 3;
     width: 7px;
     height: 7px;
     border: 2px solid #ffffff;

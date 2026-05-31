@@ -13,6 +13,7 @@ $(function () {
     const $solutionDist = $('#solutionDist');
     const $solutionNnDist = $('#solutionNnDist');
     const $solutionOptimalDist = $('#solutionOptimalDist');
+    const $solutionOptimalIncrease = $('#solutionOptimalIncrease');
     const $loadTspButton = $('#loadButton');
     const $solveTspButton = $('#solveButton');
 
@@ -55,14 +56,28 @@ $(function () {
         $solutionDist.text('--');
         $solutionNnDist.text('--');
         $solutionOptimalDist.text('--');
+        $solutionOptimalIncrease.text('--');
     }
 
     //Write the current placeholder solution values
-    function setSolutionData(nCities, dist, nnDist, optimalDist) {
+    function setSolutionData(nCities, dist, nnDist, optimalDist, optimalIncrease = '--') {
         $solutionNCities.text(nCities);
         $solutionDist.text(dist);
         $solutionNnDist.text(nnDist);
         $solutionOptimalDist.text(optimalDist);
+        $solutionOptimalIncrease.text(optimalIncrease);
+    }
+
+    //Calculate how much worse the found distance is than optimal
+    function getOptimalIncreasePercent(dist, optimalDist) {
+        const numericDist = Number(dist);
+        const numericOptimalDist = Number(optimalDist);
+
+        if (!Number.isFinite(numericDist) || !Number.isFinite(numericOptimalDist) || numericOptimalDist <= 0) {
+            return '--';
+        }
+
+        return `${(((numericDist - numericOptimalDist) / numericOptimalDist) * 100).toFixed(2)}%`;
     }
 
     //Mirror custom coord inputs onto the input board labels
@@ -112,18 +127,37 @@ $(function () {
     //Reset grid
     function resetGrid(gridId) {
         const $grid = $(gridId.startsWith('#') ? gridId : `#${gridId}`);
-        $grid.find('.grid-point').remove();
+        $grid.find('.grid-point, .grid-path-edge').remove();
+    }
+
+    //Convert one coord to a percent position inside the grid
+    function getGridPointPosition(coord, min, coordRange) {
+        const x = Number(coord.x ?? coord[0]);
+        const y = Number(coord.y ?? coord[1]);
+
+        if (!Number.isFinite(x) || !Number.isFinite(y)) {
+            return null;
+        }
+
+        return {
+            leftPercent: ((x - min) / coordRange) * 100,
+            topPercent: (1 - ((y - min) / coordRange)) * 100,
+        };
     }
 
     //Draw coord points inside a grid using padded min and max bounds
-    function drawPointsOnGrid(gridId, coords) {
+    function drawPointsOnGrid(gridId, coords, shouldResetGrid = true) {
         const $grid = $(gridId.startsWith('#') ? gridId : `#${gridId}`);
         const safeCoords = Array.isArray(coords) ? coords : [];
         const { min, max } = getMinMaxCoords(safeCoords);
         const coordRange = max - min || 1;
 
         //Clear old points before drawing new ones
-        resetGrid(gridId);
+        if (shouldResetGrid) {
+            resetGrid(gridId);
+        } else {
+            $grid.find('.grid-point').remove();
+        }
 
         //Update labels that belong to the same board frame
         $grid.closest('.point-board-frame').find('.board-coord-min').text(min);
@@ -131,24 +165,65 @@ $(function () {
 
         //Place every valid point inside the grid
         safeCoords.forEach((coord) => {
-            const x = Number(coord.x ?? coord[0]);
-            const y = Number(coord.y ?? coord[1]);
+            const position = getGridPointPosition(coord, min, coordRange);
 
-            if (!Number.isFinite(x) || !Number.isFinite(y)) {
+            if (!position) {
                 return;
             }
-
-            const leftPercent = ((x - min) / coordRange) * 100;
-            const topPercent = (1 - ((y - min) / coordRange)) * 100;
 
             $('<div>')
                 .addClass('grid-point')
                 .css({
-                    left: `${leftPercent}%`,
-                    top: `${topPercent}%`,
+                    left: `${position.leftPercent}%`,
+                    top: `${position.topPercent}%`,
                 })
                 .appendTo($grid);
         });
+    }
+
+    //Draw only the path edges and close it back to the first city
+    function drawPathOnGrid(gridId, coords, path) {
+        const $grid = $(gridId.startsWith('#') ? gridId : `#${gridId}`);
+        const safeCoords = Array.isArray(coords) ? coords : [];
+        const safePath = Array.isArray(path) ? path : [];
+        const { min, max } = getMinMaxCoords(safeCoords);
+        const coordRange = max - min || 1;
+
+        //Start from a clean grid with the same bounds as points
+        resetGrid(gridId);
+        $grid.closest('.point-board-frame').find('.board-coord-min').text(min);
+        $grid.closest('.point-board-frame').find('.board-coord-max').text(max);
+
+        const pathPositions = safePath.map((coordIndex) => {
+            const coord = safeCoords[Number(coordIndex)];
+
+            return coord ? getGridPointPosition(coord, min, coordRange) : null;
+        }).filter(Boolean);
+
+        //Draw every edge plus the final closing edge
+        pathPositions.forEach((position, index) => {
+            const nextPosition = pathPositions[(index + 1) % pathPositions.length];
+
+            if (!nextPosition || pathPositions.length < 2) {
+                return;
+            }
+
+            const deltaX = nextPosition.leftPercent - position.leftPercent;
+            const deltaY = nextPosition.topPercent - position.topPercent;
+            const edgeLength = Math.hypot(deltaX, deltaY);
+            const edgeAngle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+
+            $('<div>')
+                .addClass('grid-path-edge')
+                .css({
+                    left: `${position.leftPercent}%`,
+                    top: `${position.topPercent}%`,
+                    width: `${edgeLength}%`,
+                    transform: `translateY(-50%) rotate(${edgeAngle}deg)`,
+                })
+                .appendTo($grid);
+        });
+
     }
 
     //Focus the first required field that has no value
@@ -303,10 +378,13 @@ $(function () {
                 const nCities = result.nCities;
                 const dist = result.dist;
                 const nnDist = result.nnDist;
-                const optimalDist = result.optimalDist > 0 ? result.optimalDist : '-';
-                drawPointsOnGrid('outputPathBoard', tspCoords);
+                const optimalDist = result.optimalDist > 0 ? result.optimalDist : '--';
+                const optimalIncrease = getOptimalIncreasePercent(dist, result.optimalDist);
+                const path = result.path;
+                drawPathOnGrid('outputPathBoard', tspCoords, path);
+                drawPointsOnGrid('outputPathBoard', tspCoords, false);
                 setProblemState('Solved', 'Solution ready');
-                setSolutionData(nCities, dist, nnDist, optimalDist);
+                setSolutionData(nCities, dist, nnDist, optimalDist, optimalIncrease);
             },
             error: function (xhr) {
                 console.log(xhr.responseText);

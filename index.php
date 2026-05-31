@@ -262,6 +262,10 @@
                                         <span>Optimal distance</span>
                                         <strong id="solutionOptimalDist">--</strong>
                                     </div>
+                                    <div class="solution-data-field">
+                                        <span>Increase from optimal</span>
+                                        <strong id="solutionOptimalIncrease">--</strong>
+                                    </div>
                                 </div>
                             </div>
                         </article>
