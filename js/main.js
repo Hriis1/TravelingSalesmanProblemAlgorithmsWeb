@@ -494,7 +494,7 @@ $(function () {
 
             //Send the req to load the tsp coords for display
             $.ajax({
-                url: 'backend/tspApi/tspApiController.php',
+                url: 'backend/tspApi/tspApiRouter.php',
                 type: 'GET',
                 data: {
                     action: 'getTspInstanceCoords',
@@ -577,7 +577,7 @@ $(function () {
 
             //Send the req to load the tsp file coords for display
             $.ajax({
-                url: 'backend/tspApi/tspApiController.php',
+                url: 'backend/tspApi/tspApiRouter.php',
                 type: 'POST',
                 data: {
                     action: 'getTspCustomFileCoords',
@@ -639,7 +639,7 @@ $(function () {
         setProblemState('Solving', 'Solve in progress');
 
         solveRequest = $.ajax({
-            url: 'backend/tspApi/tspApiController.php',
+            url: 'backend/tspApi/tspApiRouter.php',
             type: 'POST',
             data: {
                 action: 'solveTsp',
