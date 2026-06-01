@@ -15,21 +15,21 @@ if ($userId > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in | TSP Algorithms</title>
+    <title>Register | TSP Algorithms</title>
     <link rel="stylesheet" href="css/auth.css">
 </head>
 
 <body>
     <main class="auth-page">
-        <section class="auth-card" aria-label="Log in form">
+        <section class="auth-card" aria-label="Register form">
             <div class="auth-brand">
                 <div class="auth-brand-mark" aria-hidden="true">TSP</div>
                 <div>
-                    <h1>Log in</h1>
+                    <h1>Register</h1>
                 </div>
             </div>
 
-            <form class="auth-form" id="loginForm">
+            <form class="auth-form" id="registerForm">
                 <div class="auth-field">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" autocomplete="username" required>
@@ -37,17 +37,22 @@ if ($userId > 0) {
 
                 <div class="auth-field">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                    <input type="password" id="password" name="password" autocomplete="new-password" required>
                 </div>
 
-                <p class="auth-message" id="loginMessage" aria-live="polite"></p>
+                <div class="auth-field">
+                    <label for="passwordConfirm">Confirm password</label>
+                    <input type="password" id="passwordConfirm" name="password_confirm" autocomplete="new-password" required>
+                </div>
 
-                <button class="auth-button" type="submit" id="loginButton">Log in</button>
+                <p class="auth-message" id="registerMessage" aria-live="polite"></p>
+
+                <button class="auth-button" type="submit" id="registerButton">Register</button>
             </form>
 
             <div class="auth-switch">
-                <span>Don't have an account?</span>
-                <a class="auth-link-button" href="register.php">Register</a>
+                <span>Already have an account?</span>
+                <a class="auth-link-button" href="login.php">Log in</a>
             </div>
         </section>
     </main>
@@ -56,58 +61,63 @@ if ($userId > 0) {
 
     <script>
         $(function () {
-            const $loginForm = $('#loginForm');
-            const $loginButton = $('#loginButton');
-            const $loginMessage = $('#loginMessage');
+            const $registerForm = $('#registerForm');
+            const $registerButton = $('#registerButton');
+            const $registerMessage = $('#registerMessage');
             const $username = $('#username');
             const $password = $('#password');
+            const $passwordConfirm = $('#passwordConfirm');
 
             //Show the current form message
-            function setLoginMessage(message, type = 'error') {
-                $loginMessage
+            function setRegisterMessage(message, type = 'error') {
+                $registerMessage
                     .removeClass('success error')
                     .addClass(type)
                     .text(message);
             }
 
-            //Post login data through userRouter
-            $loginForm.on('submit', function (event) {
+            //Post register data through userRouter
+            $registerForm.on('submit', function (event) {
                 event.preventDefault();
 
                 const username = $username.val().trim();
                 const password = $password.val();
+                const passwordConfirm = $passwordConfirm.val();
 
-                if (!username || !password) {
-                    setLoginMessage('Enter username and password');
+                if (!username || !password || !passwordConfirm) {
+                    setRegisterMessage('Enter username and passwords');
                     return;
                 }
 
-                $loginButton.prop('disabled', true).text('Logging in...');
-                setLoginMessage('');
+                $registerButton.prop('disabled', true).text('Registering...');
+                setRegisterMessage('');
 
                 $.ajax({
                     url: 'backend/users/userRouter.php',
                     type: 'POST',
                     dataType: 'json',
                     data: {
-                        action: 'logInUser',
+                        action: 'registerUser',
                         username: username,
-                        password: password
+                        password: password,
+                        password_confirm: passwordConfirm
                     },
                     success: function (result) {
                         if (result.success == true) {
-                            setLoginMessage('Login successful', 'success');
+                            setRegisterMessage('Registration successful', 'success');
                             window.location.href = 'index.php';
                             return;
                         }
 
-                        setLoginMessage(result.error || 'Could not log in');
+                        console.log(result);
+
+                        setRegisterMessage(result.error || 'Could not register');
                     },
                     error: function () {
-                        setLoginMessage('Could not log in');
+                        setRegisterMessage('Could not register');
                     },
                     complete: function () {
-                        $loginButton.prop('disabled', false).text('Log in');
+                        $registerButton.prop('disabled', false).text('Register');
                     }
                 });
             });

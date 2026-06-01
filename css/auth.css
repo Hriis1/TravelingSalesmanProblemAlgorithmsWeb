@@ -153,6 +153,37 @@ input:focus {
     transform: none;
 }
 
+.auth-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.auth-link-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: var(--primary-dark);
+    background: #ffffff;
+    font-weight: 800;
+    text-decoration: none;
+    transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.auth-link-button:hover {
+    border-color: var(--primary);
+    background: #eff6ff;
+}
+
 @media (max-width: 520px) {
     .auth-page {
         padding: 16px;
@@ -160,5 +191,11 @@ input:focus {
 
     .auth-card {
         padding: 22px;
+    }
+
+    .auth-switch {
+        align-items: stretch;
+        flex-direction: column;
+        text-align: center;
     }
 }
