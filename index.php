@@ -29,6 +29,8 @@ if (!$user) {
 </head>
 
 <body>
+    <?php require __DIR__ . "/backend/componenets/topBar.php"; ?>
+
     <main class="page">
         <section class="app-shell" aria-label="TSP solver interface">
             <header class="topbar">

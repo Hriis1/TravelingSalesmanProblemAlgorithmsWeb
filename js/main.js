@@ -16,6 +16,7 @@ $(function () {
     const $solutionOptimalIncrease = $('#solutionOptimalIncrease');
     const $loadTspButton = $('#loadButton');
     const $solveTspButton = $('#solveButton');
+    const $logOutButton = $('#logOutButton');
     const $solveModal = $('#solveModal');
     const $solveModalStatus = $('#solveModalStatus');
     const $cancelSolveButton = $('#cancelSolveButton');
@@ -375,6 +376,20 @@ $(function () {
     //Toggle between the available input modes
     $inputTypes.on('change', function () {
         switchInputType($(this).val());
+    });
+
+    //Log out the current user through userRouter
+    $logOutButton.on('click', function () {
+        $.ajax({
+            url: 'backend/users/userRouter.php',
+            type: 'POST',
+            data: {
+                action: 'logOutUser'
+            },
+            complete: function () {
+                window.location.href = 'login.php';
+            }
+        });
     });
 
     //Update board labels while the user edits the coordinate range
