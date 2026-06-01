@@ -44,5 +44,16 @@ class UserService
         $_SESSION["user_id"] = $userId;
     }
 
+    public function logOutUser()
+    {
+        //user id
+        $userId = $_SESSION["user_id"] ?? null;
+
+        if ($userId) { //if there was a logged in user
+            //log out user
+            unset($_SESSION["user_id"]);
+        }
+    }
+
     private \mysqli $mysqli;
 }
