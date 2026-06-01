@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . "/backend/componenets/includes.php";
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
