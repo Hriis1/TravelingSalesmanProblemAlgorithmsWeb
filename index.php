@@ -8,6 +8,14 @@ if ($userId <= 0) {
     header("Location: login.php");
     exit;
 }
+
+//Get user
+$user = getFromDBByID("users", $userId, $mysqli);
+if (!$user) {
+    unset($_SESSION["user_id"]);
+    header("Location: login.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
