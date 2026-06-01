@@ -1,5 +1,13 @@
 <?php
 require_once __DIR__ . "/backend/componenets/includes.php";
+
+
+//if user is not logged in
+$userId = (int) ($_SESSION["user_id"] ?? 0);
+if ($userId <= 0) {
+    header("Location: login.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
