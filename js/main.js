@@ -30,6 +30,7 @@ $(function () {
 
     const $instanceName = $('#instanceName');
     const $instanceAlgorithm = $('#instanceAlgorithm');
+    const $savedCustomTsp = $('#savedCustomTsp');
     const $customAlgorithm = $('#customAlgorithm');
     const $coordsMin = $('#coordsMin');
     const $coordsMax = $('#coordsMax');
@@ -403,6 +404,37 @@ $(function () {
     }
 
     $saveLoadedCustomTspButton.hide();
+
+    //Load saved tsp names for the custom tsp select
+    function loadSavedCustomTsps() {
+        $.ajax({
+            url: 'backend/users/userRouter.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'getAllUsersTspsNames'
+            },
+            success: function (result) {
+                $savedCustomTsp.find('option:not(:first)').remove();
+
+                if (result.success != true || !Array.isArray(result.tsps)) {
+                    return;
+                }
+
+                result.tsps.forEach(function (tsp) {
+                    $('<option>')
+                        .val(tsp.id)
+                        .text(tsp.name)
+                        .appendTo($savedCustomTsp);
+                });
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+
+    loadSavedCustomTsps();
 
     //Toggle between the available input modes
     $inputTypes.on('change', function () {

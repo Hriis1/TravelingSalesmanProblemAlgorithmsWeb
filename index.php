@@ -189,6 +189,13 @@ if (!$user) {
 
                         <div class="input-panel" id="customInputPanel" data-input-panel="custom">
                             <div class="field">
+                                <label for="savedCustomTsp">Saved TSPs</label>
+                                <select id="savedCustomTsp" name="savedCustomTsp">
+                                    <option value="" selected disabled>-- Chouse a saved TSP --</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
                                 <label for="customAlgorithm">Algorithm</label>
                                 <select id="customAlgorithm" name="customAlgorithm">
                                     <option value="" selected disabled>-- Chouse an algorithm --</option>
