@@ -31,6 +31,7 @@ $(function () {
     const $instanceName = $('#instanceName');
     const $instanceAlgorithm = $('#instanceAlgorithm');
     const $savedCustomTsp = $('#savedCustomTsp');
+    const $loadSavedCustomTspButton = $('#loadSavedCustomTspButton');
     const $customAlgorithm = $('#customAlgorithm');
     const $coordsMin = $('#coordsMin');
     const $coordsMax = $('#coordsMax');
@@ -477,6 +478,67 @@ $(function () {
         setProblemState('Not loaded', 'Load TSP before saving or solving');
     });
 
+    //Load the selected saved tsp into the custom tsp editor
+    $loadSavedCustomTspButton.on('click', function () {
+        const savedTspId = $savedCustomTsp.val();
+
+        if (!savedTspId) {
+            setProblemState('Missing input', 'Choose a saved TSP');
+            $savedCustomTsp.trigger('focus');
+            return;
+        }
+
+        $loadSavedCustomTspButton.prop('disabled', true).text('Loading...');
+
+        $.ajax({
+            url: 'backend/users/userRouter.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'getUsersTsp',
+                tsp_id: savedTspId
+            },
+            success: function (result) {
+                if (result.success != true || !result.tsp) {
+                    setProblemState('Error loading TSP', result.error || 'Could not load saved TSP');
+                    return;
+                }
+
+                const savedTsp = result.tsp;
+                const coordBounds = {
+                    min: Number(savedTsp.coords_min),
+                    max: Number(savedTsp.coords_max)
+                };
+
+                if (!Array.isArray(savedTsp.coords) || !Number.isFinite(coordBounds.min) || !Number.isFinite(coordBounds.max)) {
+                    setProblemState('Error loading TSP', 'Saved TSP data is invalid');
+                    return;
+                }
+
+                $coordsMin.val(coordBounds.min);
+                $coordsMax.val(coordBounds.max);
+                updateInputBoardCoords();
+
+                customTspCoords = savedTsp.coords.map((coord) => [...coord]);
+                tspCoords = customTspCoords.map((coord) => [...coord]);
+                tspRequestBody = buildTspReqBody();
+
+                drawPointsOnGrid('customPointBoard', customTspCoords, true, coordBounds);
+                resetGrid('outputPathBoard');
+                resetOutputCoords();
+                resetSolutionData();
+                setProblemState('Loaded', 'Saved TSP loaded');
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                setProblemState('Error loading TSP', 'Could not load saved TSP');
+            },
+            complete: function () {
+                $loadSavedCustomTspButton.prop('disabled', false).text('Load');
+            }
+        });
+    });
+
     //Invalidate loaded custom file data when the chosen file changes
     $customTspFile.on('change', function () {
         customTspFileContents = '';
@@ -799,6 +861,16 @@ $(function () {
         }
 
         const inputType = tspRequestBody.inputType;
+
+        //Refresh custom request body with the current algorithm
+        if (inputType == 'custom') {
+            if (focusFirstEmpty($customAlgorithm)) {
+                setProblemState('Missing input', 'Enter algorithm before solving');
+                return;
+            }
+
+            tspRequestBody = buildTspReqBody();
+        }
 
         //Send the req to solve tsp
         solveWasCancelled = false;

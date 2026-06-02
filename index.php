@@ -190,9 +190,14 @@ if (!$user) {
                         <div class="input-panel" id="customInputPanel" data-input-panel="custom">
                             <div class="field">
                                 <label for="savedCustomTsp">Saved TSPs</label>
-                                <select id="savedCustomTsp" name="savedCustomTsp">
-                                    <option value="" selected disabled>-- Chouse a saved TSP --</option>
-                                </select>
+                                <div class="saved-tsp-row">
+                                    <select id="savedCustomTsp" name="savedCustomTsp">
+                                        <option value="" selected disabled>-- Chouse a saved TSP --</option>
+                                    </select>
+                                    <button class="btn btn-secondary" type="button" id="loadSavedCustomTspButton">
+                                        Load
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="field">

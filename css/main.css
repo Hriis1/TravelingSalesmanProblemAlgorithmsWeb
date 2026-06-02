@@ -279,6 +279,16 @@ h1 {
     gap: 12px;
 }
 
+.saved-tsp-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+}
+
+.saved-tsp-row .btn {
+    min-width: 92px;
+}
+
 label {
     color: #334155;
     font-size: 0.9rem;
