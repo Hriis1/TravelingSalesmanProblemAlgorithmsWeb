@@ -630,11 +630,13 @@ h3 {
     backdrop-filter: blur(4px);
 }
 
-.solve-modal.active {
+.solve-modal.active,
+.save-tsp-modal.active {
     display: flex;
 }
 
-.solve-modal-card {
+.solve-modal-card,
+.save-tsp-modal-card {
     position: relative;
     width: min(100%, 420px);
     padding: 26px;
@@ -644,7 +646,8 @@ h3 {
     box-shadow: var(--shadow);
 }
 
-.solve-modal-card h2 {
+.solve-modal-card h2,
+.save-tsp-modal-card h2 {
     margin: 0 34px 14px 0;
     font-size: 1.2rem;
 }
@@ -679,6 +682,59 @@ h3 {
 }
 
 .solve-modal-close:hover {
+    background: #cbd5e1;
+}
+
+.save-tsp-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.38);
+    backdrop-filter: blur(4px);
+}
+
+.save-tsp-form {
+    display: grid;
+    gap: 14px;
+}
+
+.save-tsp-message {
+    min-height: 22px;
+    margin: -4px 0 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.save-tsp-message.error {
+    color: #b91c1c;
+}
+
+.save-tsp-message.success {
+    color: var(--success);
+}
+
+.save-tsp-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 8px;
+    color: #334155;
+    background: #e2e8f0;
+    cursor: pointer;
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.save-tsp-modal-close:hover {
     background: #cbd5e1;
 }
 

@@ -17,6 +17,13 @@ $(function () {
     const $loadTspButton = $('#loadButton');
     const $solveTspButton = $('#solveButton');
     const $logOutButton = $('#logOutButton');
+    const $saveLoadedCustomTspButton = $('#saveLoadedCustomTspButton');
+    const $saveTspModal = $('#saveTspModal');
+    const $closeSaveTspModalButton = $('#closeSaveTspModalButton');
+    const $saveTspForm = $('#saveTspForm');
+    const $saveTspName = $('#saveTspName');
+    const $saveTspMessage = $('#saveTspMessage');
+    const $saveTspSubmitButton = $('#saveTspSubmitButton');
     const $solveModal = $('#solveModal');
     const $solveModalStatus = $('#solveModalStatus');
     const $cancelSolveButton = $('#cancelSolveButton');
@@ -159,6 +166,27 @@ $(function () {
         solveTimer = null;
         solveStartedAt = null;
         $solveModal.removeClass('active').attr('aria-hidden', 'true');
+    }
+
+    //Show the save tsp modal
+    function showSaveTspModal() {
+        $saveTspName.val('');
+        setSaveTspMessage('');
+        $saveTspModal.addClass('active').attr('aria-hidden', 'false');
+        $saveTspName.trigger('focus');
+    }
+
+    //Hide the save tsp modal
+    function hideSaveTspModal() {
+        $saveTspModal.removeClass('active').attr('aria-hidden', 'true');
+    }
+
+    //Show the current save tsp message
+    function setSaveTspMessage(message, type = 'error') {
+        $saveTspMessage
+            .removeClass('success error')
+            .addClass(type)
+            .text(message);
     }
 
     //Mirror custom coord inputs onto the input board labels
@@ -368,10 +396,13 @@ $(function () {
         $inputPanels.removeClass('active');
         $inputPanels.filter(`[data-input-panel="${inputType}"]`).addClass('active');
 
+        $saveLoadedCustomTspButton.toggle(inputType == 'custom');
         $selectedInputType.text(getInputTypeLabel(inputType));
         setProblemState('None', `${getInputTypeLabel(inputType)} selected`);
         resetLoadedTspState();
     }
+
+    $saveLoadedCustomTspButton.hide();
 
     //Toggle between the available input modes
     $inputTypes.on('change', function () {
@@ -397,6 +428,21 @@ $(function () {
         updateInputBoardCoords();
         customTspCoords = [];
         resetGrid('customPointBoard');
+
+        if (tspRequestBody.inputType != 'custom') {
+            return;
+        }
+
+        tspRequestBody = {
+            inputType: null,
+            instance: null,
+            algorithm: null,
+        };
+        tspCoords = [];
+        resetGrid('outputPathBoard');
+        resetOutputCoords();
+        resetSolutionData();
+        setProblemState('Not loaded', 'Load TSP before saving or solving');
     });
 
     //Invalidate loaded custom file data when the chosen file changes
@@ -457,6 +503,79 @@ $(function () {
         solveRequest.abort();
         hideSolveModal();
         setProblemState('Cancelled', 'Solve cancelled');
+    });
+
+    //Open save modal only when a custom tsp is loaded
+    $saveLoadedCustomTspButton.on('click', function () {
+        if (tspRequestBody.inputType != 'custom' || tspCoords.length === 0) {
+            setProblemState('Not loaded', 'Load custom TSP before saving');
+            return;
+        }
+
+        if (!getCustomCoordBounds()) {
+            setProblemState('Invalid input', 'Enter valid minimum and maximum');
+            return;
+        }
+
+        showSaveTspModal();
+    });
+
+    //Close the save modal without saving
+    $closeSaveTspModalButton.on('click', function () {
+        hideSaveTspModal();
+    });
+
+    //Save the loaded custom tsp for the current user
+    $saveTspForm.on('submit', function (event) {
+        event.preventDefault();
+
+        const tspName = $saveTspName.val().trim();
+        const coordBounds = getCustomCoordBounds();
+
+        if (!tspName) {
+            setSaveTspMessage('Enter a TSP name');
+            $saveTspName.trigger('focus');
+            return;
+        }
+
+        if (tspRequestBody.inputType != 'custom' || tspCoords.length === 0 || !coordBounds) {
+            hideSaveTspModal();
+            setProblemState('Not loaded', 'Load custom TSP before saving');
+            return;
+        }
+
+        $saveTspSubmitButton.prop('disabled', true).text('Saving...');
+        setSaveTspMessage('');
+
+        $.ajax({
+            url: 'backend/users/userRouter.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'saveCustomTsp',
+                name: tspName,
+                coords_min: coordBounds.min,
+                coords_max: coordBounds.max,
+                coords: JSON.stringify(tspCoords)
+            },
+            success: function (result) {
+                if (result.success == true) {
+                    setSaveTspMessage('TSP saved', 'success');
+                    setProblemState('Saved', 'Custom TSP saved');
+                    hideSaveTspModal();
+                    return;
+                }
+
+                setSaveTspMessage(result.error || 'Could not save TSP');
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                setSaveTspMessage('Could not save TSP');
+            },
+            complete: function () {
+                $saveTspSubmitButton.prop('disabled', false).text('Save TSP');
+            }
+        });
     });
 
     //Build the body that will be sent to api

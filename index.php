@@ -252,6 +252,9 @@ if (!$user) {
 
                         <div class="button-stack">
                             <button class="btn btn-secondary" type="button" id="loadButton">Load TSP</button>
+                            <button class="btn btn-secondary" type="button" id="saveLoadedCustomTspButton">
+                                Save loaded TSP
+                            </button>
                             <button class="btn btn-primary" type="button" id="solveButton">Solve TSP</button>
                         </div>
                     </form>
@@ -335,6 +338,22 @@ if (!$user) {
             <h2 id="solveModalTitle">Solving TSP</h2>
             <p class="solve-modal-status" id="solveModalStatus">Solving TSP using -- algorithm for 0 secs</p>
             <p class="solve-modal-note">This may take a while</p>
+        </div>
+    </div>
+
+    <div class="save-tsp-modal" id="saveTspModal" aria-hidden="true">
+        <div class="save-tsp-modal-card" role="dialog" aria-modal="true" aria-labelledby="saveTspModalTitle">
+            <button class="save-tsp-modal-close" type="button" id="closeSaveTspModalButton"
+                aria-label="Close save TSP modal">x</button>
+            <h2 id="saveTspModalTitle">Save loaded TSP</h2>
+            <form class="save-tsp-form" id="saveTspForm">
+                <div class="field">
+                    <label for="saveTspName">TSP name</label>
+                    <input type="text" id="saveTspName" name="saveTspName" autocomplete="off">
+                </div>
+                <p class="save-tsp-message" id="saveTspMessage" aria-live="polite"></p>
+                <button class="btn btn-primary" type="submit" id="saveTspSubmitButton">Save TSP</button>
+            </form>
         </div>
     </div>
 
