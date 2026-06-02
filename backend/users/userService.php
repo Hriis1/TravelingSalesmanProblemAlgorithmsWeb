@@ -89,9 +89,16 @@ class UserService
         }
     }
 
-    public function saveCustomTsp(int $userId, string $name, int $coordsMin, int $coordsMax, ?array $coords)
+    public function getUsersTsp(int $userId, int $tspId)
+    {
+
+    }
+
+    public function saveCustomTsp(string $name, int $coordsMin, int $coordsMax, ?array $coords)
     {
         //Validation
+        $userId = $_SESSION["user_id"];
+        
         if ($userId <= 0)
             return ["success" => false, "error" => "Invalid user"];
 
@@ -123,8 +130,6 @@ class UserService
     {
         $_SESSION["user_id"] = $userId;
     }
-
-
 
     private \mysqli $mysqli;
 }
