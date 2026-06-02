@@ -89,11 +89,14 @@ class UserService
         }
     }
 
-    public function saveCustomTsp(int $userId, int $coordsMin, int $coordsMax, ?array $coords)
+    public function saveCustomTsp(int $userId, string $name, int $coordsMin, int $coordsMax, ?array $coords)
     {
         //Validation
         if ($userId <= 0)
             return ["success" => false, "error" => "Invalid user"];
+
+        if ($name == "")
+            return ["success" => false, "error" => "Invalid name"];
 
         if ($coordsMin >= $coordsMax)
             return ["success" => false, "error" => "Invalid min/max coordinates pairing"];
@@ -105,14 +108,15 @@ class UserService
         $coordsJson = json_encode($coords);
 
         //save to db
-        $stmt = $this->mysqli->prepare("INSERT INTO saved_tsps (user_id, coords_min, coords_max, coords) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiis", $userId, $coordsMin, $coordsMax, $coordsJson);
+        $stmt = $this->mysqli->prepare("INSERT INTO saved_tsps (user_id, name, coords_min, coords_max, coords) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("isiis", $userId, $name, $coordsMin, $coordsMax, $coordsJson);
 
         if (!$stmt->execute())
             return ["success" => false, "error" => "Failed to save TSP"];
 
         return ["success" => true, "error" => ""];
     }
+
 
     //private
     private function logInUser(int $userId)
