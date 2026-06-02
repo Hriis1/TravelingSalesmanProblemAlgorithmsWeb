@@ -91,14 +91,54 @@ class UserService
 
     public function getUsersTsp(int $userId, int $tspId)
     {
+        //Validation
+        if ($userId <= 0)
+            return ["success" => false, "error" => "Invalid user"];
 
+        if ($tspId <= 0)
+            return ["success" => false, "error" => "Invalid saved TSP"];
+
+        //get from db
+        $stmt = $this->mysqli->prepare("SELECT name, coords_min, coords_max, coords FROM saved_tsps WHERE id = ? AND user_id = ? AND deleted = 0");
+        $stmt->bind_param("ii", $tspId, $userId);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $tsp = $result->fetch_assoc();
+
+        if (!$tsp)
+            return ["success" => false, "error" => "Saved TSP not found"];
+
+        $tsp["coords"] = json_decode($tsp["coords"], true);
+
+        return ["success" => true, "error" => "", "tsp" => $tsp];
     }
 
-    public function saveCustomTsp(string $name, int $coordsMin, int $coordsMax, ?array $coords)
+    public function getAllUsersTspsNames(int $userId)
     {
         //Validation
-        $userId = $_SESSION["user_id"];
-        
+        if ($userId <= 0)
+            return ["success" => false, "error" => "Invalid user"];
+
+        //get from db
+        $stmt = $this->mysqli->prepare("SELECT id, name FROM saved_tsps WHERE user_id = ? AND deleted = 0 ORDER BY id DESC");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $tsps = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $tsps[] = $row;
+        }
+
+        return ["success" => true, "error" => "", "tsps" => $tsps];
+    }
+
+    public function saveCustomTsp(int $userId, string $name, int $coordsMin, int $coordsMax, ?array $coords)
+    {
+        //Validation
         if ($userId <= 0)
             return ["success" => false, "error" => "Invalid user"];
 
