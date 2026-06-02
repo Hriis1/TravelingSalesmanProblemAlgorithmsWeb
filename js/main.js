@@ -657,6 +657,7 @@ $(function () {
                     setSaveTspMessage('TSP saved', 'success');
                     setProblemState('Saved', 'Custom TSP saved');
                     hideSaveTspModal();
+                    loadSavedCustomTsps();
                     return;
                 }
 
