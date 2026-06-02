@@ -528,6 +528,7 @@ $(function () {
                     tspCoords = result.coords
                     drawPointsOnGrid('instancePointBoard', tspCoords);
                     setProblemState('TSP Loaded', 'Loaded');
+                    resetGrid('outputPathBoard');
                     resetOutputCoords();
                     resetSolutionData();
                 },
