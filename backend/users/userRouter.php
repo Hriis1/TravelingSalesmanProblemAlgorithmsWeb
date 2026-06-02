@@ -31,4 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo 1;
         exit;
     }
+
+    if (($_POST["action"] ?? "") == "saveCustomTsp") { //save custom tsp for user
+        $userId = (int) ($_POST["user_id"] ?? 0);
+        $coordsMin = (int) ($_POST["coords_min"] ?? 0);
+        $coordsMax = (int) ($_POST["coords_max"] ?? 0);
+        $coords = json_decode($_POST["coords"] ?? "[]", true);
+
+        $res = $userService->saveCustomTsp($userId, $coordsMin, $coordsMax, $coords);
+        echo json_encode($res);
+        exit;
+    }
 }
