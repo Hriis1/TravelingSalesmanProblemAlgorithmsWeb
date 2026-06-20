@@ -409,7 +409,7 @@ $(function () {
     //Load saved tsp names for the custom tsp select
     function loadSavedCustomTsps() {
         $.ajax({
-            url: 'backend/users/userRouter.php',
+            url: 'backend/users/userController.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -442,10 +442,10 @@ $(function () {
         switchInputType($(this).val());
     });
 
-    //Log out the current user through userRouter
+    //Log out the current user through userController
     $logOutButton.on('click', function () {
         $.ajax({
-            url: 'backend/users/userRouter.php',
+            url: 'backend/users/userController.php',
             type: 'POST',
             data: {
                 action: 'logOutUser'
@@ -491,7 +491,7 @@ $(function () {
         $loadSavedCustomTspButton.prop('disabled', true).text('Loading...');
 
         $.ajax({
-            url: 'backend/users/userRouter.php',
+            url: 'backend/users/userController.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -642,7 +642,7 @@ $(function () {
         setSaveTspMessage('');
 
         $.ajax({
-            url: 'backend/users/userRouter.php',
+            url: 'backend/users/userController.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -723,7 +723,7 @@ $(function () {
 
             //Send the req to load the tsp coords for display
             $.ajax({
-                url: 'backend/tspApi/tspApiRouter.php',
+                url: 'backend/tspApi/tspApiController.php',
                 type: 'GET',
                 data: {
                     action: 'getTspInstanceCoords',
@@ -807,7 +807,7 @@ $(function () {
 
             //Send the req to load the tsp file coords for display
             $.ajax({
-                url: 'backend/tspApi/tspApiRouter.php',
+                url: 'backend/tspApi/tspApiController.php',
                 type: 'POST',
                 data: {
                     action: 'getTspCustomFileCoords',
@@ -879,7 +879,7 @@ $(function () {
         setProblemState('Solving', 'Solve in progress');
 
         solveRequest = $.ajax({
-            url: 'backend/tspApi/tspApiRouter.php',
+            url: 'backend/tspApi/tspApiController.php',
             type: 'POST',
             data: {
                 action: 'solveTsp',
